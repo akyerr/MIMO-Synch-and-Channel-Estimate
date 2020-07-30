@@ -64,7 +64,7 @@ classdef MultiAntennaSystem < handle
             end
             
             
-            obj.max_impulse = 5;
+            obj.max_impulse = obj.NFFT;
             
             obj.tx_symbs = zeros(obj.num_ant, obj.NFFT*obj.num_symbols);
             obj.rx_symbs = zeros(obj.num_ant, obj.NFFT*obj.num_symbols);
