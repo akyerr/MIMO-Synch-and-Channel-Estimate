@@ -3,11 +3,13 @@ clear
 close all
 dbstop if error
 
-tic
-snr_diag = 100; % dB
+rng('default')
 
-scenarios = {'4G5G', 'MIMOTest', 'Fading', 'IndoorA', 960e3*0.9, 15e3, 0;
-    '4G5G', 'MIMOTest', 'Fading', 'IndoorB', 960e3*0.9, 15e3, 0};
+tic
+snr_diag = 30; % dB
+
+scenarios = {'4G5G', 'MIMOTest', 'Fading', 'IndoorA', 960e3*0.9, 15e3, 0};
+
 
 num_cases = size(scenarios, 1);
 
@@ -57,17 +59,24 @@ for cc = 1: num_cases
     end
     
     if strcmpi(MIMO_method, 'MIMOTest')
+        if num_ant == 2
+        synch_data_pattern = [1, 0, 2, 0; 
+                              0, 1, 0, 2];
+        elseif num_ant == 4
+            synch_data_pattern = [1, 0, 0, 0, 2, 0, 0, 0;
+                                  0, 1, 0, 0, 0, 2, 0, 0; 
+                                  0, 0, 1, 0, 0, 0, 2, 0;
+                                  0, 0, 0, 1, 0, 0, 0, 2];
+        end
+        symb_pattern = repmat(synch_data_pattern, 1, 3); % 0 - zeros, 1 - synch, 2 - data
+        num_symbols = size(symb_pattern, 2); % per subframe? Yes. Per antenna? Yes.
         
-        symb_pattern = [1, 0, 2, 0;
-                        0, 1, 0, 2]; % 0 - zeros, 1 - synch, 2 - data
-        num_symbols = 4; % per subframe? Yes. Per antenna? Yes.
-        
-        num_data_symb = 1; % per antenna
+        num_data_symb = length(find(symb_pattern(1, :)==2)); % per antenna
         
     else
-%         symb_pattern here should be automated based on number of subframes and
-%         number of symbols per subframe. num_symbols can then simply be
-%         the length of symb_pattern.
+        %         symb_pattern here should be automated based on number of subframes and
+        %         number of symbols per subframe. num_symbols can then simply be
+        %         the length of symb_pattern.
         error('Currently not supported');
     end
     
@@ -75,12 +84,39 @@ for cc = 1: num_cases
     
     
     Caz = SynchSignal(CP, num_synchbins, num_ant, NFFT);
-    ZChu = Caz.ZChu;
+    Caz.zadoff_chu_gen([23, 41])
     
     OFDM_par.synch_bin_ind = Caz.synch_bin_ind;
-    multiant_sys = MultiAntennaSystem(OFDM_par, system, num_symbols);
+    multiant_sys = MultiAntennaSystem(OFDM_par, system, Caz, num_symbols);
     
     multiant_sys.multiant_binarymap(symb_pattern, binary_info)
     
+    multiant_sys.multiant_symbgen(num_symbols);
+    
+%     for ant = 1: num_ant
+%         figure()
+%         xax = 1: length(multiant_sys.tx_symbs(ant, :));
+%         plot(xax, real(multiant_sys.tx_symbs(ant, :)), xax, imag(multiant_sys.tx_symbs(ant, :)));
+%         xlabel('Frequency')
+%         ylabel('Amplitude')
+%         title(['Antenna ', num2str(ant), ' Amplitude of Tx Symbols'])
+%     end
+%     
+%     for ant = 1: num_ant
+%         figure()
+%         xax = 1: length(multiant_sys.tx_waveform(ant, :));
+%         plot(xax, real(multiant_sys.tx_waveform(ant, :)), xax, imag(multiant_sys.tx_waveform(ant, :)));
+%         xlabel('Time')
+%         ylabel('Amplitude')
+%         title(['Antenna ', num2str(ant), ' Amplitude of Tx Waveform'])
+%     end
+    
+    multiant_sys.channel_gen
+    multiant_sys.rxsignal_gen();
+    
+    rx_sys = RxBasebandSystem(multiant_sys, Caz, system, OFDM_par);
+    rx_sys.synchronize(synch_data_pattern, symb_pattern)
+    
+    dbg = 1;
 end
 

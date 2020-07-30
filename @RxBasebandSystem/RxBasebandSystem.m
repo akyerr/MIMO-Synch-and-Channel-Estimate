@@ -14,7 +14,7 @@ classdef RxBasebandSystem < handle
         genie_channel_time = [];
         multiant_sys = [];
         Caz = [];
-        synch_ref = [];
+        synch_ref_freq = [];
         rx_waveform = [];
         system = [];
         stride_val = [];
@@ -31,6 +31,11 @@ classdef RxBasebandSystem < handle
         est_chan_time = [];
         est_synch_freq = [];
         samp_delay = [];
+        max_tap = [];
+        synch_ref_time = [];
+        tx_waveform = [];
+        power_requirements = 0;
+        freq_chan_usedbins = [];
     end
     
     methods
@@ -46,24 +51,22 @@ classdef RxBasebandSystem < handle
                         obj.data_bin_ind = obj.multiant_sys.data_bin_ind;
                         obj.freq_channel = obj.multiant_sys.freq_channel;
                         obj.genie_channel_time = obj.multiant_sys.genie_channel_time;
+                        obj.max_tap = obj.multiant_sys.max_tap;
+                        obj.rx_waveform = obj.multiant_sys.rx_waveform;
+                        obj.tx_waveform = obj.multiant_sys.tx_waveform;
+                        obj.freq_chan_usedbins = obj.multiant_sys.freq_chan_usedbins;
                     case 2
                         obj.Caz = varargin{2};
                         obj.synch_bin_ind = obj.Caz.synch_bin_ind;
-                        obj.synch_ref = obj.Caz.ZChu;
+                        obj.synch_ref_freq = obj.Caz.ZChu;
+                        
+                        obj.synch_ref_time = obj.Caz.time_synchsymb;
                     case 3
                         obj.system = varargin{3};
                         obj.diagnostic = obj.system.diagnostic;
                         obj.fs = obj.system.fs;
                     case 4
                         obj.OFDM_par = varargin{4};
-                        obj.num_synchsymb = obj.OFDM_par.num_synchsymb;
-                        obj.est_chan_freqP = zeros(obj.num_ant, obj.num_synchsymb, obj.NFFT);
-                        obj.est_chan_freqN = zeros(obj.num_ant, obj.num_synchsymb, length(obj.synch_bin_ind));
-                        
-                        obj.est_chan_time = zeros(obj.num_ant, obj.num_synchsymb, 2);
-                        obj.est_synch_freq =zeros(obj.num_ant, obj.num_synchsymb, length(obj.synch_bin_ind));
-                    case 5
-                        obj.rx_waveform = varargin{5};
                 end
             end
         end

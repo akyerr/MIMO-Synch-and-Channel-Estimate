@@ -27,6 +27,12 @@ classdef MultiAntennaSystem < handle
         rx_waveform = [];
         num_symbols = [];
         samp_per_symb = [];
+        MIMO_method = [];
+        Caz = [];
+        ZChu = [];
+        bits_per_bin = [];
+        mod_type = [];
+        synch_bin_ind = [];
     end
     
     methods
@@ -41,12 +47,19 @@ classdef MultiAntennaSystem < handle
                         obj.num_databins = obj.OFDM_par.num_databins;
                         obj.num_ant = obj.OFDM_par.num_ant;
                         obj.samp_per_symb = obj.OFDM_par.samp_per_symb;
+                        obj.synch_bin_ind = obj.OFDM_par.synch_bin_ind;
                     case 2
                         obj.system = varargin{2};
                         obj.fs = obj.system.fs;
                         obj.channel_profile = obj.system.channel_profile;
+                        obj.MIMO_method = obj.system.MIMO_method;
+                        obj.bits_per_bin = obj.system.bits_per_bin;
+                        obj.mod_type = obj.system.mod_type;
                     case 3
-                        obj.num_symbols = varargin{3};
+                        obj.Caz = varargin{3};
+                        obj.ZChu = obj.Caz.ZChu;
+                    case 4
+                        obj.num_symbols = varargin{4};
                 end
             end
             
@@ -57,13 +70,18 @@ classdef MultiAntennaSystem < handle
             obj.rx_symbs = zeros(obj.num_ant, obj.NFFT*obj.num_symbols);
             
             obj.tx_waveform = zeros(obj.num_ant, obj.samp_per_symb*obj.num_symbols);
-            obj.tx_waveform = zeros(obj.num_ant, obj.samp_per_symb*obj.num_symbols + obj.max_impulse - 1);
+            obj.rx_waveform = zeros(obj.num_ant, obj.samp_per_symb*obj.num_symbols + obj.max_impulse - 1);
             
             
             %% channels
             
             [PDPdB, PathDelay] = ChannelProfile(obj.channel_profile);
-            test_case = 0; % 0 - LTE channel, 1 - test channel 1
+            test_case = 3; 
+            
+            
+            
+            
+            
             if obj.num_ant == 1
                 if test_case == 0
                     
@@ -102,12 +120,35 @@ classdef MultiAntennaSystem < handle
                     
                 end
             elseif obj.num_ant == 2
+                
                 if test_case == 1
                     obj.h0{1,1}=[0.3977,  0.7954 - 0.3977i,  -0.1988,  0.0994,  -0.0398].';
                     obj.h0{1,2}=[0.8423i,  0.5391, 0, 0, 0].';
                     obj.h0{2,1}=[0.1631,  -0.0815 + 0.9784i,  0.0978, 0, 0].';
                     obj.h0{2,2}=[0.0572i,  0.3659i, 0.5717 - 0.5717i, 0.4574, 0].';
+                    
+                    
+                elseif test_case == 2
+                    obj.h0{1,1}=1;
+                    obj.h0{1,2}=1;
+                    obj.h0{2,1}=1;
+                    obj.h0{2,2}=1;
+                elseif test_case == 3
+                    obj.h0{1,1}=0.3977;
+                    obj.h0{1,2}=0.8423i;
+                    obj.h0{2,1}=0.1631;
+                    obj.h0{2,2}=0.0572i;
                 end
+                obj.max_tap = zeros(obj.num_ant, obj.num_ant);
+                
+                for rx = 1: obj.num_ant
+                    for tx = 1: obj.num_ant
+                        [~, max_tap_ind] = max(abs(obj.h0{rx, tx}));
+                        obj.max_tap(rx, tx) = max_tap_ind;
+                    end
+                end
+                
+                dbg = 1;
             else
                 error('currently not supported')
             end
