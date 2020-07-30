@@ -99,7 +99,7 @@ if rx_power > obj.power_requirements
         % extract the symbol immediately after the synch
         % estimate the other channel
         synch_ind = find(rx_symb_type==1);
-        synch_start = rx_symb_start(synch_ind(1));
+        synch_start = rx_symb_start(synch_ind(2));
         ref_ant = rx_ant;
         for tx_ant = 1: obj.num_ant
             
@@ -119,16 +119,16 @@ if rx_power > obj.power_requirements
             est_chan_freq = est_chan_freq*sqrt(1/(est_chan_pow));
             
             est_chan_symb = zeros(1, obj.NFFT);
-            est_chan_symb(obj.synch_bin_ind) = est_chan_freq;
+            est_chan_symb(obj.synch_bin_ind) = est_chan_freq; 
             
-%             est_chan_time = ifft(est_chan_symb, obj.NFFT);
-            genie_channel = reshape(obj.genie_channel_time(rx_ant, tx_ant, :), 1, numel(obj.genie_channel_time(rx_ant, tx_ant, :)));
+            genie_channel = reshape(obj.genie_channel_time(rx_ant, tx_ant, :), 1, numel(obj.genie_channel_time(rx_ant, tx_ant, :))); 
             figure()
-            xax = (0:obj.NFFT-1)*obj.fs/obj.NFFT;
+            xax = (0:obj.NFFT-1);
             yax1 = 20*log10(abs(est_chan_symb));
             yax2 = 20*log10(abs(fft(genie_channel, obj.NFFT)));
-            plot(xax,yax1, 'r', xax,yax2,'b')
-            dbg = 1;
+            plot(xax, yax1, 'r', xax, yax2,'b')
+            legend({'Estimated', 'Actual'})
+            dbg = 1; %#ok
             
             
             
@@ -178,6 +178,14 @@ end
 % title(['Antenna ', num2str(ant), ' Correlation'])
 
 [max_corr_val, max_corr_ind] = max(corr_val);
+
+% if isempty(max_corr_ind)
+%     error('not enough correlations, tx again or tx more data')
+% end
+% 
+% max_corr_ind = max(max_corr_ind);
+
+
 
 dbg = 1;
 end

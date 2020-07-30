@@ -64,7 +64,7 @@ classdef MultiAntennaSystem < handle
             end
             
             
-            obj.max_impulse = obj.NFFT;
+            obj.max_impulse = 5;
             
             obj.tx_symbs = zeros(obj.num_ant, obj.NFFT*obj.num_symbols);
             obj.rx_symbs = zeros(obj.num_ant, obj.NFFT*obj.num_symbols);
@@ -76,7 +76,7 @@ classdef MultiAntennaSystem < handle
             %% channels
             
             [PDPdB, PathDelay] = ChannelProfile(obj.channel_profile);
-            test_case = 3; 
+            test_case = 1; 
             
             
             
@@ -129,15 +129,15 @@ classdef MultiAntennaSystem < handle
                     
                     
                 elseif test_case == 2
-                    obj.h0{1,1}=1;
-                    obj.h0{1,2}=1;
-                    obj.h0{2,1}=1;
-                    obj.h0{2,2}=1;
+                    obj.h0{1,1} = 1;
+                    obj.h0{1,2} = 1;
+                    obj.h0{2,1} = 1;
+                    obj.h0{2,2} = 1;
                 elseif test_case == 3
-                    obj.h0{1,1}=0.3977;
-                    obj.h0{1,2}=0.8423i;
-                    obj.h0{2,1}=0.1631;
-                    obj.h0{2,2}=0.0572i;
+                    obj.h0{1,1} = 0.7954 - 0.3977i;
+                    obj.h0{1,2} = 0.8423i;
+                    obj.h0{2,1} = -0.0815 + 0.9784i;
+                    obj.h0{2,2} = 0.5717 - 0.5717i;
                 end
                 obj.max_tap = zeros(obj.num_ant, obj.num_ant);
                 
