@@ -155,7 +155,14 @@ classdef MultiAntennaSystem < handle
                 
                 dbg = 1;
             else
-                error('currently not supported')
+                for rx = 1: obj.num_ant
+                    for tx = 1: obj.num_ant
+                        obj.h0{rx, tx} = (1/sqrt(2))*(randn(1, 5)+1i*randn(1, 5));
+                        [~, max_tap_ind] = max(abs(obj.h0{rx, tx}));
+                        obj.max_tap(rx, tx) = max_tap_ind;
+                    end
+                end
+                
             end
             
             

@@ -1,6 +1,6 @@
 function multiant_binarymap(obj, symb_pattern, binary_info)
 
-if strcmpi(obj.MIMO_method, 'MIMOTest')
+% if strcmpi(obj.MIMO_method, 'MIMOTest')
     
     for ant = 1: obj.num_ant
         qpsk_data = lteSymbolModulate(binary_info(ant, :), obj.mod_type);
@@ -36,8 +36,8 @@ if strcmpi(obj.MIMO_method, 'MIMOTest')
 %                 plot(real(obj.tx_symbs(ant, :)))
 %                 dbg = 1;
     end
-else
-    error('Currently not supported')
-end
+% else
+%     error('Currently not supported')
+% end
 
 end
