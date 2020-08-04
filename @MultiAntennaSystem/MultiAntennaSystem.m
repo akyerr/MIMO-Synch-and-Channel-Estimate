@@ -76,7 +76,7 @@ classdef MultiAntennaSystem < handle
             %% channels
             
             [PDPdB, PathDelay] = ChannelProfile(obj.channel_profile);
-            test_case = 1; 
+            test_case = 3; 
             
             
             
@@ -134,10 +134,15 @@ classdef MultiAntennaSystem < handle
                     obj.h0{2,1} = 1;
                     obj.h0{2,2} = 1;
                 elseif test_case == 3
-                    obj.h0{1,1} = 0.7954 - 0.3977i;
-                    obj.h0{1,2} = 0.8423i;
-                    obj.h0{2,1} = -0.0815 + 0.9784i;
-                    obj.h0{2,2} = 0.5717 - 0.5717i;
+                    obj.h0{1,1} = [0.7954 - 0.3977i, 0, 0, 0, 0];
+                    obj.h0{1,2} = [0.8423i, 0, 0, 0, 0];
+                    obj.h0{2,1} = [-0.0815 + 0.9784i, 0, 0, 0, 0];
+                    obj.h0{2,2} = [0.5717 - 0.5717i, 0, 0, 0, 0];
+                elseif test_case == 4
+                    obj.h0{1,1} = [0, 1, 0, 0, 0];
+                    obj.h0{1,2} = [0, 0, 0, 1, 0];
+                    obj.h0{2,1} = [1, 0, 0, 0, 0];
+                    obj.h0{2,2} = [0, 0, 0, 0, 1];
                 end
                 obj.max_tap = zeros(obj.num_ant, obj.num_ant);
                 
