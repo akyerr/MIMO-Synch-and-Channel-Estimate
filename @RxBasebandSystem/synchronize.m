@@ -9,16 +9,19 @@ start_samp = 1;
 buffer_rx_time = obj.rx_waveform(:, start_samp: end);
 mask = obj.synch_ref_time;
 
+figure()
+plot(real(fft(mask(1, obj.CP+1: end))), imag(fft(mask(1, obj.CP+1: end))), '.')
+title('Reference synch FFT')
 
 % Plotting rx waveforms
-for rx_ant = 1: obj.num_ant
-    figure()
-    xax = 1: length(obj.rx_waveform(rx_ant, :));
-    plot(xax, real(obj.rx_waveform(rx_ant, :)), xax, imag(obj.rx_waveform(rx_ant, :)));
-    xlabel('Time')
-    ylabel('Amplitude')
-    title(['Antenna ', num2str(rx_ant), ' Amplitude of Rx Waveform'])
-end
+% for rx_ant = 1: obj.num_ant
+%     figure()
+%     xax = 1: length(obj.rx_waveform(rx_ant, :));
+%     plot(xax, real(obj.rx_waveform(rx_ant, :)), xax, imag(obj.rx_waveform(rx_ant, :)));
+%     xlabel('Time')
+%     ylabel('Amplitude')
+%     title(['Antenna ', num2str(rx_ant), ' Amplitude of Rx Waveform'])
+% end
 
 
 rx_power = power_estimate(buffer_rx_time(1, :)); % power check only on antenna 1
@@ -84,14 +87,14 @@ if rx_power > obj.power_requirements
         end
         
         % for rx_ant = 1: obj.num_ant
-%     figure()
-%     xax = 1: length(obj.rx_waveform(rx_ant, :));
-%     plot(xax, real(obj.rx_waveform(rx_ant, :)), xax, imag(obj.rx_waveform(rx_ant, :)));
-%     xlabel('Time')
-%     ylabel('Amplitude')
-%     title(['Antenna ', num2str(rx_ant), ' Amplitude of Rx Waveform'])
-% end
-
+        %     figure()
+        %     xax = 1: length(obj.rx_waveform(rx_ant, :));
+        %     plot(xax, real(obj.rx_waveform(rx_ant, :)), xax, imag(obj.rx_waveform(rx_ant, :)));
+        %     xlabel('Time')
+        %     ylabel('Amplitude')
+        %     title(['Antenna ', num2str(rx_ant), ' Amplitude of Rx Waveform'])
+        % end
+        
         
         
         % on each antenna extract the first synch symbol
@@ -99,37 +102,50 @@ if rx_power > obj.power_requirements
         % extract the symbol immediately after the synch
         % estimate the other channel
         synch_ind = find(rx_symb_type==1);
-        synch_start = rx_symb_start(synch_ind(2));
+        if rx_ant == 1
+            synch_start = rx_symb_start(synch_ind(1: end));
+        else
+            synch_start = rx_symb_start(synch_ind(2: end));
+        end
         ref_ant = rx_ant;
         for tx_ant = 1: obj.num_ant
             
             synch_end = synch_start + obj.samp_per_symb-1;
-            synch_symb = buffer_rx_time(rx_ant, synch_start: synch_end);
-            synch_symb_without_cp = synch_symb(obj.CP + 1: end);
             
-            obs_synch_freq = fft(synch_symb_without_cp, obj.NFFT);
+            est_chan_symb = zeros(length(synch_start), obj.NFFT);
             
-            %%Phase rotation
+            for synch = 1: length(synch_start)
+                synch_symb = buffer_rx_time(rx_ant, synch_start(synch): synch_end(synch));
+                synch_symb_without_cp = synch_symb(obj.CP + 1: end);
+                
+                obs_synch_freq = fft(synch_symb_without_cp, obj.NFFT);
+                
+                obs_synch_pow = power_estimate(obs_synch_freq);
+                
+                obs_synch_freq = (1/sqrt(obs_synch_pow))*obs_synch_freq;
+                
+                dbg = 1; %#ok
+                
+                obs_synch_at_usedbins = obs_synch_freq(obj.synch_bin_ind);
+                
+                synch_ref = obj.synch_ref_freq(ref_ant, :);
+                
+                est_chan_freq = (obs_synch_at_usedbins.*conj(synch_ref))./abs(synch_ref);
+                
+                est_chan_pow = sum(est_chan_freq.*conj(est_chan_freq))/numel(est_chan_freq);
+                
+                est_chan_freq = est_chan_freq*sqrt(1/(est_chan_pow));
+                
+                
+                est_chan_symb(synch, obj.synch_bin_ind) = est_chan_freq;
+            end
             
-            
-            
-            obs_synch_at_usedbins = obs_synch_freq(obj.synch_bin_ind);
-            
-            synch_ref = obj.synch_ref_freq(ref_ant, :);
-            
-            est_chan_freq = (obs_synch_at_usedbins.*conj(synch_ref))./abs(synch_ref);
-            
-            est_chan_pow = sum(est_chan_freq.*conj(est_chan_freq))/numel(est_chan_freq);
-            
-            est_chan_freq = est_chan_freq*sqrt(1/(est_chan_pow));
-            
-            est_chan_symb = zeros(1, obj.NFFT);
-            est_chan_symb(obj.synch_bin_ind) = est_chan_freq; 
-            
-            genie_channel = reshape(obj.genie_channel_time(rx_ant, tx_ant, :), 1, numel(obj.genie_channel_time(rx_ant, tx_ant, :))); 
+            est_chan_avg = sum(est_chan_symb)/size(est_chan_symb, 1);
+
+            genie_channel = reshape(obj.genie_channel_time(rx_ant, tx_ant, :), 1, numel(obj.genie_channel_time(rx_ant, tx_ant, :)));
             figure()
-            xax = (0:obj.NFFT-1);
-            yax1 = 20*log10(abs(est_chan_symb));
+            xax = (0:obj.NFFT-1)*obj.fs/obj.NFFT;
+            yax1 = 20*log10(abs(est_chan_avg));
             yax2 = 20*log10(abs(fft(genie_channel, obj.NFFT)));
             plot(xax, yax1, 'r', xax, yax2,'b')
             legend({'Estimated', 'Actual'})
@@ -187,7 +203,7 @@ end
 % if isempty(max_corr_ind)
 %     error('not enough correlations, tx again or tx more data')
 % end
-% 
+%
 % max_corr_ind = max(max_corr_ind);
 
 

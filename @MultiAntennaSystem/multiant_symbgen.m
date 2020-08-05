@@ -25,9 +25,9 @@ for symb = 1: num_symbols
         
     end
     
-%     for ant = 1: obj.num_ant
-%         obj.tx_waveform(ant, (symb-1)*obj.samp_per_symb+1: symb*obj.samp_per_symb) = ...
-%             obj.tx_waveform(ant, (symb-1)*obj.samp_per_symb+1: symb*obj.samp_per_symb)*(1/sqrt(pow));
-%     end
+    for ant = 1: obj.num_ant
+        obj.tx_waveform(ant, (symb-1)*obj.samp_per_symb+1: symb*obj.samp_per_symb) = ...
+            obj.tx_waveform(ant, (symb-1)*obj.samp_per_symb+1: symb*obj.samp_per_symb)*(1/sqrt(pow));
+    end
 end
 end

@@ -33,6 +33,8 @@ classdef MultiAntennaSystem < handle
         bits_per_bin = [];
         mod_type = [];
         synch_bin_ind = [];
+        diagnostic = [];
+        doppler_shift = 100;
     end
     
     methods
@@ -55,6 +57,7 @@ classdef MultiAntennaSystem < handle
                         obj.MIMO_method = obj.system.MIMO_method;
                         obj.bits_per_bin = obj.system.bits_per_bin;
                         obj.mod_type = obj.system.mod_type;
+                        obj.diagnostic = obj.system.diagnostic;
                     case 3
                         obj.Caz = varargin{3};
                         obj.ZChu = obj.Caz.ZChu;
@@ -76,7 +79,7 @@ classdef MultiAntennaSystem < handle
             %% channels
             
             [PDPdB, PathDelay] = ChannelProfile(obj.channel_profile);
-            test_case = 1;
+            test_case = 2;
             
             
             
@@ -121,9 +124,50 @@ classdef MultiAntennaSystem < handle
                 end
             elseif obj.num_ant == 2
                 if test_case == 0
+                    tx_corr = full(gallery('tridiag', obj.num_ant, 0.1, 1, 0.1));
+                    rx_corr = full(gallery('tridiag', obj.num_ant, 0.1, 1, 0.1));
                     
+                    dup_tx_corr = zeros(size(tx_corr,1), size(tx_corr,2), length(PDPdB));
+                    dup_rx_corr = zeros(size(rx_corr,1), size(rx_corr,2), length(PDPdB));
                     
+                    for ga =1:length(PDPdB)
+                        dup_tx_corr(:, :, ga) = tx_corr;
+                        dup_rx_corr(:, :, ga) = rx_corr;
+                    end
                     
+                    if obj.diagnostic == 0
+                        mimo_chan = comm.MIMOChannel('SampleRate', obj.fs, ...
+                            'PathDelays', PathDelay, ...
+                            'AveragePathGains', PDPdB, ...
+                            'NormalizePathGains', true,...
+                            'MaximumDopplerShift', obj.doppler_shift, ...
+                            'TransmitCorrelationMatrix', dup_tx_corr, ...
+                            'ReceiveCorrelationMatrix', dup_rx_corr, ...
+                            'RandomStream','mt19937ar with seed', ...
+                            'Seed', 33, ...
+                            'PathGainsOutputPort', true, ...
+                            'Visualization', 'off');
+                    else
+                        mimo_chan = comm.MIMOChannel('SampleRate', obj.fs, ...
+                            'PathDelays', PathDelay, ...
+                            'AveragePathGains', PDPdB, ...
+                            'NormalizePathGains', true,...
+                            'MaximumDopplerShift', obj.doppler_shift, ...
+                            'TransmitCorrelationMatrix', dup_tx_corr, ...
+                            'ReceiveCorrelationMatrix' , dup_rx_corr, ...
+                            'RandomStream','mt19937ar with seed', ...
+                            'Seed', 33, ...
+                            'PathGainsOutputPort', true);
+                    end
+                    
+                    for tx = 1: obj.num_ant
+                        ximpulse = zeros(obj.NFFT, obj.num_ant);
+                        ximpulse(1,tx) = 1;
+                        [outsignal, pathgains] = mimo_chan(ximpulse);
+                        for rx =1:obj.num_ant
+                            obj.h0{tx, rx} = outsignal(1:obj.CP, rx).';
+                        end
+                    end
                     
                 elseif test_case == 1
                     obj.h0{1,1}=[0.3977,  0.7954 - 0.3977i,  -0.1988,  0.0994,  -0.0398].';

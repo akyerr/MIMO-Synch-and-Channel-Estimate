@@ -1,4 +1,4 @@
-% clc
+clc
 clear
 close all
 dbstop if error
@@ -78,6 +78,7 @@ for cc = 1: num_cases
         
         Caz = SynchSignal(CP, num_synchbins, num_ant, NFFT);
         Caz.zadoff_chu_gen([23, 41])
+%         Caz.zadoff_chu_gen(23)
         
         OFDM_par.synch_bin_ind = Caz.synch_bin_ind;
         multiant_sys = MultiAntennaSystem(OFDM_par, system, Caz, num_symbols);
@@ -86,23 +87,23 @@ for cc = 1: num_cases
         
         multiant_sys.multiant_symbgen(num_symbols);
         
-            for ant = 1: num_ant
-                figure()
-                xax = 1: length(multiant_sys.tx_symbs(ant, :));
-                plot(xax, real(multiant_sys.tx_symbs(ant, :)), xax, imag(multiant_sys.tx_symbs(ant, :)));
-                xlabel('Frequency')
-                ylabel('Amplitude')
-                title(['Antenna ', num2str(ant), ' Amplitude of Tx Symbols'])
-            end
-        
-            for ant = 1: num_ant
-                figure()
-                xax = 1: length(multiant_sys.tx_waveform(ant, :));
-                plot(xax, real(multiant_sys.tx_waveform(ant, :)), xax, imag(multiant_sys.tx_waveform(ant, :)));
-                xlabel('Time')
-                ylabel('Amplitude')
-                title(['Antenna ', num2str(ant), ' Amplitude of Tx Waveform'])
-            end
+%             for ant = 1: num_ant
+%                 figure()
+%                 xax = 1: length(multiant_sys.tx_symbs(ant, :));
+%                 plot(xax, real(multiant_sys.tx_symbs(ant, :)), xax, imag(multiant_sys.tx_symbs(ant, :)));
+%                 xlabel('Frequency')
+%                 ylabel('Amplitude')
+%                 title(['Antenna ', num2str(ant), ' Amplitude of Tx Symbols'])
+%             end
+%         
+%             for ant = 1: num_ant
+%                 figure()
+%                 xax = 1: length(multiant_sys.tx_waveform(ant, :));
+%                 plot(xax, real(multiant_sys.tx_waveform(ant, :)), xax, imag(multiant_sys.tx_waveform(ant, :)));
+%                 xlabel('Time')
+%                 ylabel('Amplitude')
+%                 title(['Antenna ', num2str(ant), ' Amplitude of Tx Waveform'])
+%             end
         
         multiant_sys.channel_gen
         multiant_sys.rxsignal_gen();
