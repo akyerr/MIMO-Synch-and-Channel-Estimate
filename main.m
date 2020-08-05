@@ -1,4 +1,4 @@
-clc
+% clc
 clear
 close all
 dbstop if error
@@ -8,8 +8,8 @@ rng('default')
 tic
 snr_diag = 30; % dB
 
-% scenarios = {'4G5G', 'MIMOTest', 'Fading', 'IndoorA', 960e3*0.9, 15e3, 0};
-scenarios = {'4G5G', 'KUserMIMO', 'Fading', 'IndoorA', 960e3*0.9, 15e3, 0};
+scenarios = {'4G5G', 'MIMOTest', 'Fading', 'IndoorA', 960e3*0.9, 15e3, 0};
+% scenarios = {'4G5G', 'KUserMIMO', 'Fading', 'IndoorA', 960e3*0.9, 15e3, 0};
 
 
 num_cases = size(scenarios, 1);
@@ -62,8 +62,10 @@ for cc = 1: num_cases
     
     if strcmpi(MIMO_method, 'MIMOTest')
         
-        synch_data_pattern = [eye(num_ant), zeros(num_ant)];
-        synch_data_pattern(1, num_ant+1) = 2; % if data on one antenna only. otherwise use eye in previous line.
+%         synch_data_pattern = [eye(num_ant), zeros(num_ant)];
+        synch_data_pattern = [eye(num_ant), 2*eye(num_ant)];
+
+%         synch_data_pattern(1, num_ant+1) = 2; % if data on one antenna only. otherwise use eye in previous line.
         
         
         symb_pattern = repmat(synch_data_pattern, 1, 3); % 0 - zeros, 1 - synch, 2 - data
@@ -84,23 +86,23 @@ for cc = 1: num_cases
         
         multiant_sys.multiant_symbgen(num_symbols);
         
-        %     for ant = 1: num_ant
-        %         figure()
-        %         xax = 1: length(multiant_sys.tx_symbs(ant, :));
-        %         plot(xax, real(multiant_sys.tx_symbs(ant, :)), xax, imag(multiant_sys.tx_symbs(ant, :)));
-        %         xlabel('Frequency')
-        %         ylabel('Amplitude')
-        %         title(['Antenna ', num2str(ant), ' Amplitude of Tx Symbols'])
-        %     end
-        %
-        %     for ant = 1: num_ant
-        %         figure()
-        %         xax = 1: length(multiant_sys.tx_waveform(ant, :));
-        %         plot(xax, real(multiant_sys.tx_waveform(ant, :)), xax, imag(multiant_sys.tx_waveform(ant, :)));
-        %         xlabel('Time')
-        %         ylabel('Amplitude')
-        %         title(['Antenna ', num2str(ant), ' Amplitude of Tx Waveform'])
-        %     end
+            for ant = 1: num_ant
+                figure()
+                xax = 1: length(multiant_sys.tx_symbs(ant, :));
+                plot(xax, real(multiant_sys.tx_symbs(ant, :)), xax, imag(multiant_sys.tx_symbs(ant, :)));
+                xlabel('Frequency')
+                ylabel('Amplitude')
+                title(['Antenna ', num2str(ant), ' Amplitude of Tx Symbols'])
+            end
+        
+            for ant = 1: num_ant
+                figure()
+                xax = 1: length(multiant_sys.tx_waveform(ant, :));
+                plot(xax, real(multiant_sys.tx_waveform(ant, :)), xax, imag(multiant_sys.tx_waveform(ant, :)));
+                xlabel('Time')
+                ylabel('Amplitude')
+                title(['Antenna ', num2str(ant), ' Amplitude of Tx Waveform'])
+            end
         
         multiant_sys.channel_gen
         multiant_sys.rxsignal_gen();

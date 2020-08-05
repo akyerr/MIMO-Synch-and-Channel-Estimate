@@ -6,6 +6,7 @@ for rx = 1: obj.num_ant
         channel = reshape(obj.time_channel(rx, tx, :), 1, numel(obj.time_channel(rx, tx, :)));
         txsignal = reshape(obj.tx_waveform(tx, :), 1, numel(obj.tx_waveform(tx, :)));
         rxsignal = rxsignal + conv(channel, txsignal);
+        dbg = 1;
     end
     obj.rx_waveform(rx, :) = rxsignal;
 end

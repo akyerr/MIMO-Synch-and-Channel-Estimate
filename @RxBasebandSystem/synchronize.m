@@ -11,14 +11,14 @@ mask = obj.synch_ref_time;
 
 
 % Plotting rx waveforms
-% for rx_ant = 1: obj.num_ant
-%     figure()
-%     xax = 1: length(obj.rx_waveform(rx_ant, :));
-%     plot(xax, real(obj.rx_waveform(rx_ant, :)), xax, imag(obj.rx_waveform(rx_ant, :)));
-%     xlabel('Time')
-%     ylabel('Amplitude')
-%     title(['Antenna ', num2str(rx_ant), ' Amplitude of Rx Waveform'])
-% end
+for rx_ant = 1: obj.num_ant
+    figure()
+    xax = 1: length(obj.rx_waveform(rx_ant, :));
+    plot(xax, real(obj.rx_waveform(rx_ant, :)), xax, imag(obj.rx_waveform(rx_ant, :)));
+    xlabel('Time')
+    ylabel('Amplitude')
+    title(['Antenna ', num2str(rx_ant), ' Amplitude of Rx Waveform'])
+end
 
 
 rx_power = power_estimate(buffer_rx_time(1, :)); % power check only on antenna 1
@@ -108,6 +108,11 @@ if rx_power > obj.power_requirements
             synch_symb_without_cp = synch_symb(obj.CP + 1: end);
             
             obs_synch_freq = fft(synch_symb_without_cp, obj.NFFT);
+            
+            %%Phase rotation
+            
+            
+            
             obs_synch_at_usedbins = obs_synch_freq(obj.synch_bin_ind);
             
             synch_ref = obj.synch_ref_freq(ref_ant, :);
