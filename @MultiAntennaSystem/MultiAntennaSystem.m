@@ -79,7 +79,7 @@ classdef MultiAntennaSystem < handle
             %% channels
             
             [PDPdB, PathDelay] = ChannelProfile(obj.channel_profile);
-            test_case = 2;
+            test_case = 4;
             
             
             
