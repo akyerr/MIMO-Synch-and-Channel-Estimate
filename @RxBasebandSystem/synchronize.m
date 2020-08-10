@@ -4,7 +4,7 @@ num_tx_symb = size(symb_pattern, 2);
 max_exp_data_elements = num_tx_symb*obj.samp_per_symb;
 
 
-start_samp = 4;
+start_samp = 1;
 
 buffer_rx_time = obj.rx_waveform(:, start_samp: end);
 mask = obj.synch_ref_time;
@@ -28,10 +28,12 @@ rx_power = power_estimate(buffer_rx_time(1, :)); % power check only on antenna 1
 
 if rx_power > obj.power_requirements
     
+    est_chan_avg = cell(obj.num_ant, obj.num_ant);
     for rx_ant = 1: obj.num_ant
-        disp(rx_ant)
+        
         
         for tx_ant = 1: obj.num_ant
+            disp(['At rx ant ', num2str(rx_ant), ' from tx ant ', num2str(tx_ant)]);
             [~, max_corr_ind] = correlate(buffer_rx_time(rx_ant, :), mask(tx_ant, :));
             
             power_est = power_estimate(buffer_rx_time(rx_ant, 1:max_corr_ind));
@@ -127,21 +129,33 @@ if rx_power > obj.power_requirements
                 est_chan_symb(synch, obj.synch_bin_ind) = est_chan_freq;
             end
             
-            est_chan_avg = sum(est_chan_symb)/size(est_chan_symb, 1);
+            est_chan_avg{rx_ant, tx_ant} = sum(est_chan_symb, 1)/size(est_chan_symb, 1);
             
             genie_channel = reshape(obj.genie_channel_time(rx_ant, tx_ant, :), 1, numel(obj.genie_channel_time(rx_ant, tx_ant, :)));
-            figure()
-            xax = (0:obj.NFFT-1)*obj.fs/obj.NFFT;
-            yax1 = 20*log10(abs(est_chan_avg));
-            yax2 = 20*log10(abs(fft(genie_channel, obj.NFFT)));
-            plot(xax, yax1, 'r', xax, yax2,'b')
-            legend({'Estimated', 'Actual'})
+%             figure()
+%             xax = (0:obj.NFFT-1)*obj.fs/obj.NFFT;
+%             yax1 = 20*log10(abs(est_chan_avg{rx_ant, tx_ant}));
+%             yax2 = 20*log10(abs(fft(genie_channel, obj.NFFT)));
+%             plot(xax, yax1, 'r', xax, yax2,'b')
+%             legend({'Estimated', 'Actual'})
             dbg = 1; %#ok
 
         end
         dbg = 1;
     end
+else
+    error('rx signals is not strong enough');
 end
+est_MIMO_chan = cell(1, obj.NFFT);
+% frequency domain matrices
+for bin = 1: obj.NFFT
+    for rx_ant = 1: obj.num_ant
+        for tx_ant = 1: obj.num_ant
+            est_MIMO_chan{bin}(rx_ant, tx_ant) = est_chan_avg{rx_ant, tx_ant}(bin);
+        end
+    end
+end
+
 
 
 dbg = 1;

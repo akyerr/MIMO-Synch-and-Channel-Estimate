@@ -115,11 +115,11 @@ for cc = 1: num_cases
         %         symb_pattern here should be automated based on number of subframes and
         %         number of symbols per subframe. num_symbols can then simply be
         %         the length of symb_pattern.
-        num_tx_iter = 2; % first iteration for initial estimate
+        num_tx_iter = 1; % first iteration for initial estimate
         
         for tx_iter = 1: num_tx_iter
             if tx_iter == 1
-                synch_data_pattern = [eye(num_ant)];
+                synch_data_pattern = eye(num_ant);
             else
                 synch_data_pattern = [eye(num_ant), 2*ones(num_ant)];
             end
