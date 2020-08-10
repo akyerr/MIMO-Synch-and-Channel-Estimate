@@ -79,7 +79,7 @@ classdef MultiAntennaSystem < handle
             %% channels
             
             [PDPdB, PathDelay] = ChannelProfile(obj.channel_profile);
-            test_case = 4;
+            test_case = 1;
             
             
             
@@ -173,9 +173,7 @@ classdef MultiAntennaSystem < handle
                     obj.h0{1,1}=[0.3977,  0.7954 - 0.3977i,  -0.1988,  0.0994,  -0.0398].';
                     obj.h0{1,2}=[0.8423i,  0.5391, 0, 0, 0].';
                     obj.h0{2,1}=[0.1631,  -0.0815 + 0.9784i,  0.0978, 0, 0].';
-                    obj.h0{2,2}=[0.0572i,  0.3659i, 0.5717 - 0.5717i, 0.4574, 0].';
-                    
-                    
+                    obj.h0{2,2}=[0.0572i,  0.3659i, 0.5717 - 0.5717i, 0.4574, 0].';   
                 elseif test_case == 2
                     obj.h0{1,1} = 1;
                     obj.h0{1,2} = 1;

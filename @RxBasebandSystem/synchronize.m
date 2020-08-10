@@ -9,21 +9,6 @@ start_samp = 1;
 buffer_rx_time = obj.rx_waveform(:, start_samp: end);
 mask = obj.synch_ref_time;
 
-% figure()
-% plot(real(fft(mask(1, obj.CP+1: end))), imag(fft(mask(1, obj.CP+1: end))), '.')
-% title('Reference synch FFT')
-
-% Plotting rx waveforms
-% for rx_ant = 1: obj.num_ant
-%     figure()
-%     xax = 1: length(obj.rx_waveform(rx_ant, :));
-%     plot(xax, real(obj.rx_waveform(rx_ant, :)), xax, imag(obj.rx_waveform(rx_ant, :)));
-%     xlabel('Time')
-%     ylabel('Amplitude')
-%     title(['Antenna ', num2str(rx_ant), ' Amplitude of Rx Waveform'])
-% end
-
-
 rx_power = power_estimate(buffer_rx_time(1, :)); % power check only on antenna 1
 
 if rx_power > obj.power_requirements
@@ -119,6 +104,10 @@ if rx_power > obj.power_requirements
                 
                 synch_ref = obj.synch_ref_freq(tx_ant, :);
                 
+                scale_factor = synch_ref(1)/obs_synch_at_usedbins(1);
+                
+                obs_synch_at_usedbins = obs_synch_at_usedbins*scale_factor;
+                
                 est_chan_freq = (obs_synch_at_usedbins.*conj(synch_ref))./abs(synch_ref);
                 
                 est_chan_pow = sum(est_chan_freq.*conj(est_chan_freq))/numel(est_chan_freq);
@@ -132,12 +121,12 @@ if rx_power > obj.power_requirements
             est_chan_avg{rx_ant, tx_ant} = sum(est_chan_symb, 1)/size(est_chan_symb, 1);
             
             genie_channel = reshape(obj.genie_channel_time(rx_ant, tx_ant, :), 1, numel(obj.genie_channel_time(rx_ant, tx_ant, :)));
-%             figure()
-%             xax = (0:obj.NFFT-1)*obj.fs/obj.NFFT;
-%             yax1 = 20*log10(abs(est_chan_avg{rx_ant, tx_ant}));
-%             yax2 = 20*log10(abs(fft(genie_channel, obj.NFFT)));
-%             plot(xax, yax1, 'r', xax, yax2,'b')
-%             legend({'Estimated', 'Actual'})
+            figure()
+            xax = (0:obj.NFFT-1)*obj.fs/obj.NFFT;
+            yax1 = 20*log10(abs(est_chan_avg{rx_ant, tx_ant}));
+            yax2 = 20*log10(abs(fft(genie_channel, obj.NFFT)));
+            plot(xax, yax1, 'r', xax, yax2,'b')
+            legend({'Estimated', 'Actual'})
             dbg = 1; %#ok
 
         end
@@ -183,20 +172,9 @@ for win = 1: num_windows
     corr_val(win) = abs(sum(rx_signal(start: fin)*mask'));
     
 end
-% figure()
-% plot(corr_val)
-% xlabel('Window index')
-% ylabel('Correlation value')
-% title(['Antenna ', num2str(ant), ' Correlation'])
+
 
 [max_corr_val, max_corr_ind] = max(corr_val);
-
-% if isempty(max_corr_ind)
-%     error('not enough correlations, tx again or tx more data')
-% end
-%
-% max_corr_ind = max(max_corr_ind);
-
 
 
 dbg = 1;
