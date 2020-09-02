@@ -36,6 +36,7 @@ classdef RxBasebandSystem < handle
         tx_waveform = [];
         power_requirements = 0;
         freq_chan_usedbins = [];
+        ZChu = [];
     end
     
     methods
@@ -51,6 +52,7 @@ classdef RxBasebandSystem < handle
                         obj.data_bin_ind = obj.multiant_sys.data_bin_ind;
                         obj.freq_channel = obj.multiant_sys.freq_channel;
                         obj.genie_channel_time = obj.multiant_sys.genie_channel_time;
+                        
                         obj.max_tap = obj.multiant_sys.max_tap;
                         obj.rx_waveform = obj.multiant_sys.rx_waveform;
                         obj.tx_waveform = obj.multiant_sys.tx_waveform;
@@ -58,8 +60,8 @@ classdef RxBasebandSystem < handle
                     case 2
                         obj.Caz = varargin{2};
                         obj.synch_bin_ind = obj.Caz.synch_bin_ind;
-                        obj.synch_ref_freq = obj.Caz.ZChu;
-                        
+                        obj.synch_ref_freq = obj.Caz.freq_synchsymb;
+                        obj.ZChu = obj.Caz.ZChu;
                         obj.synch_ref_time = obj.Caz.time_synchsymb;
                     case 3
                         obj.system = varargin{3};

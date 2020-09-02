@@ -7,6 +7,7 @@ classdef SynchSignal < handle
         ZChu = [];
         synch_bin_ind = [];
         time_synchsymb = [];
+        freq_synchsymb = [];
     end
     methods
         function obj = SynchSignal(varargin)
@@ -34,6 +35,8 @@ classdef SynchSignal < handle
                 error('Num of primes has to equal num of antennas')
             end
             
+            
+            obj.freq_synchsymb = zeros(obj.num_ant, obj.NFFT);
             for ant = 1: obj.num_ant
                 
                 prime_no = prime_nos(ant);
@@ -48,12 +51,14 @@ classdef SynchSignal < handle
                 
                 
                 
-                freq_synchsymb = zeros(1, obj.NFFT);
-                freq_synchsymb(obj.synch_bin_ind) = obj.ZChu(ant, :);
                 
-                synch_ifftout = ifft(freq_synchsymb, obj.NFFT);
+                obj.freq_synchsymb(ant, obj.synch_bin_ind) = obj.ZChu(ant, :);
+                
+                synch_ifftout = ifft(obj.freq_synchsymb(ant, :), obj.NFFT);
+                
                 synch_cp = synch_ifftout(end - obj.CP + 1: end);
                 obj.time_synchsymb(ant, :) = [synch_cp, synch_ifftout];
+                
             end
         end
         

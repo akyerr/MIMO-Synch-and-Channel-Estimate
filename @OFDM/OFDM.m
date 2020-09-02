@@ -6,6 +6,7 @@ classdef OFDM < handle
         NFFT = 64;
         CP = 16;
         num_databins = 62;
+        num_synchbins = 62;
         bin_spacing = 15e3;
         mod_type = 'QPSK';
         samp_per_symb = [];

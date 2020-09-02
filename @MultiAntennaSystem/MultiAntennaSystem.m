@@ -33,6 +33,7 @@ classdef MultiAntennaSystem < handle
         bits_per_bin = [];
         mod_type = [];
         synch_bin_ind = [];
+        num_synchbins = [];
         diagnostic = [];
         doppler_shift = 100;
     end
@@ -50,6 +51,7 @@ classdef MultiAntennaSystem < handle
                         obj.num_ant = obj.OFDM_par.num_ant;
                         obj.samp_per_symb = obj.OFDM_par.samp_per_symb;
                         obj.synch_bin_ind = obj.OFDM_par.synch_bin_ind;
+                        obj.num_synchbins = obj.OFDM_par.num_synchbins;
                     case 2
                         obj.system = varargin{2};
                         obj.fs = obj.system.fs;

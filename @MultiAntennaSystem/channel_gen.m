@@ -7,7 +7,8 @@ dbg = 1;
 
 obj.time_channel = zeros(obj.num_ant, obj.num_ant, obj.max_impulse);
 obj.freq_channel = zeros(obj.num_ant, obj.num_ant, obj.NFFT);
-obj.freq_chan_usedbins = zeros(obj.num_ant, obj.num_ant, obj.num_databins);
+obj.freq_chan_usedbins = zeros(obj.num_ant, obj.num_ant, obj.num_synchbins);
+% obj.freq_chan_usedbins_synch = zeros(obj.num_ant, obj.num_ant, obj.num_synchbins);
 h = cell(size(obj.h0));
 for rx = 1: obj.num_ant
     for tx = 1: obj.num_ant
@@ -16,7 +17,8 @@ for rx = 1: obj.num_ant
 %         obj.time_channel(rx, tx, 1: length(h{rx,tx})) = h{rx,tx}/norm(h{rx,tx});
         obj.time_channel(rx, tx, 1: length(h{rx,tx})) = h{rx,tx};
         obj.freq_channel(rx, tx,:) = fft(obj.time_channel(rx, tx, 1: length(h{rx,tx})), obj.NFFT);
-        obj.freq_chan_usedbins(rx,tx,:) = obj.freq_channel(rx, tx, obj.data_bin_ind);
+        obj.freq_chan_usedbins(rx, tx, :) = obj.freq_channel(rx, tx, obj.synch_bin_ind);
+%         obj.freq_chan_usedbins_synch(rx, tx, :) = obj.freq_channel(rx, tx, obj.synch_bin_ind);
     end
 end
 

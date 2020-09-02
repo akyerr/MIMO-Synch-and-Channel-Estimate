@@ -30,4 +30,7 @@ for symb = 1: num_symbols
             obj.tx_waveform(ant, (symb-1)*obj.samp_per_symb+1: symb*obj.samp_per_symb)*(1/sqrt(pow));
     end
 end
+dbg = 1; %#ok
 end
+
+
