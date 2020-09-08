@@ -6,7 +6,7 @@ dbstop if error
 rng('default')
 
 tic
-snr_diag = 30; % dB
+snr_diag = 20; % dB
 
 scenarios = {'4G5G', 'MIMOTest', 'Fading', 'IndoorA', 960e3*0.9, 15e3, 0};
 % scenarios = {'4G5G', 'KUserMIMO', 'Fading', 'IndoorA', 960e3*0.9, 15e3, 0};
